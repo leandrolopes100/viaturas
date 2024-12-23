@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <style>
+    /* Estilo geral */
+    .report-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .chart {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    /* Estilo específico para o gráfico */
+    .chart canvas {
+      width: 70% !important;  /* Define a largura para 50% */
+      height: 400px !important; /* Ajusta a altura para um valor fixo */
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-bottom: 30px;
+      background-color: #fdfdfd;
+      border-radius: 10px;
+      flex-wrap: wrap;
+      padding: 10px;
+    }
+
+    .summary p {
+      margin: 10px;
+      font-size: 1rem;
+    }
+
+    .details {
+      margin-top: 20px;
+    }
+
+    .details table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .details th, .details td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .details th {
+      background-color: #0096c7;
+      color: white;
+    }
+
+    .details tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .download-buttons {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .download-buttons a {
+      margin: 0 15px;
+      padding: 10px 20px;
+      background-color: #0096c7;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .download-buttons a:hover {
+      background-color: #007b8a;
+    }
+
+    /* Estilo de campo de filtro */
+    .filter-container {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .filter-container select, .filter-container input {
+      padding: 10px;
+      font-size: 1.0rem;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+
+    .filter-container button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .filter-container button:hover {
+      background-color: #218838;
+    }
+  </style>
+
+  <div class="report-container">
+    <h1>Relatório de Viaturas</h1>
+
+    <div class="summary">
+      <p><strong>Total de Viaturas:</strong> {{ total_viaturas }}</p>
+      <p><strong>Viaturas em QAP:</strong> {{ qap_count }}</p>
+      <p><strong>Viaturas em F.A.:</strong> {{ fa_count }}</p>
+      <p><strong>Viaturas em Manutenção:</strong> {{ manutencao_count }}</p>
+    </div>
+
+    <div class="chart">
+      <canvas id="viaturasChart"></canvas>
+    </div>
+    
+    <div class="details">
+        <h2>Detalhes das Viaturas</h2>
+
+         <!-- Filtro de Viaturas -->
+    <div class="filter-container">
+        <input type="text" id="searchInput" placeholder="Buscar por modelo ou prefixo..." onkeyup="filterTable()">
+        <select id="situacaoFilter" onchange="filterTable()">
+          <option value="">Filtrar por Situação</option>
+          <option value="QAP">QAP</option>
+          <option value="F.A.">F.A.</option>
+          <option value="Manutenção">Manutenção</option>
+        </select>
+        <button onclick="filterTable()">Filtrar</button>
+      </div>
+
+        <table id="viaturasTable">
+          <thead>
+            <tr>
+              <th>Modelo</th>
+              <th>Batalhão</th>
+              <th>Pelotão</th>
+              <th>Cia</th>
+              <th>Situação</th>
+              <th>Prefixo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if cars %}
+              {% for car in cars %}
+              <tr>
+                <td>{{ car.brand }} {{ car.model }}</td>
+                <td>{{ car.batalhao }}</td>
+                <td>{{ car.pelotao }}</td>
+                <td>{{ car.cia }}</td>
+                <td>{{ car.situacao }}</td>
+                <td>{{ car.prefixo }}</td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="6">Nenhuma viatura encontrada.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+    </div>
+
+    <!-- Botões de download (PDF e CSV) -->
+    <div class="download-buttons">
+        <a href="{{ csv_download_url }}" class="btn btn-secondary">Baixar Relatório em CSV</a>
+    </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Filtro de Tabela
+    function filterTable() {
+      var input = document.getElementById("searchInput");
+      var filter = input.value.toLowerCase();
+      var table = document.getElementById("viaturasTable");
+      var tr = table.getElementsByTagName("tr");
+      var situacaoFilter = document.getElementById("situacaoFilter").value;
+
+      for (var i = 1; i < tr.length; i++) {
+        var td = tr[i].getElementsByTagName("td");
+        var model = td[0] ? td[0].textContent || td[0].innerText : "";
+        var prefixo = td[5] ? td[5].textContent || td[5].innerText : "";
+        var situacao = td[4] ? td[4].textContent || td[4].innerText : "";
+
+        if (model.toLowerCase().indexOf(filter) > -1 || prefixo.toLowerCase().indexOf(filter) > -1) {
+          if (situacaoFilter === "" || situacao.toLowerCase() === situacaoFilter.toLowerCase()) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+
+    const ctx = document.getElementById('viaturasChart').getContext('2d');
+    const viaturasChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['QAP', 'F.A.', 'Manutenção'],
+        datasets: [{
+          label: 'Quantidade de Viaturas',
+          data: [
+            {{ qap_count }},
+            {{ fa_count }},
+            {{ manutencao_count }}
+          ],
+          backgroundColor: [
+            'rgba(40, 167, 69, 0.6)', // Verde para QAP
+            'rgba(220, 53, 69, 0.6)', // Vermelho para F.A.
+            'rgba(255, 135, 7, 0.6)'  // Laranja para Manutenção
+          ],
+          borderColor: [
+            'rgba(40, 167, 69, 1)',
+            'rgba(220, 53, 69, 1)',
+            'rgba(255, 135, 7, 1)'
+          ],
+          borderWidth: 2,
+          borderRadius: 5, // Bordas arredondadas
+          hoverBackgroundColor: [
+            'rgba(40, 167, 69, 0.8)', // Efeito de hover para QAP
+            'rgba(220, 53, 69, 0.8)', // Efeito de hover para F.A.
+            'rgba(255, 135, 7, 0.8)'  // Efeito de hover para Manutenção
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              precision: 0
+            }
+          }
+        },
+        animation: {
+          duration: 1500,  // Duração da animação (1,5 segundos)
+          easing: 'easeOutBounce'  // Efeito de animação
+        },
+        hover: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.7)', // Cor do fundo da tooltip
+            titleColor: 'white', // Cor do título da tooltip
+            bodyColor: 'white', // Cor do corpo da tooltip
+            borderColor: 'rgba(0, 0, 0, 0.3)', // Cor da borda
+            borderWidth: 1,
+            callbacks: {
+              label: function(tooltipItem) {
+                return tooltipItem.raw + ' Viaturas'; // Exibir no tooltip a quantidade de viaturas
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
+
+{% endblock %}

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <style>
+        /* Estilos principais */
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: #0077b6;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+            transition: padding 0.3s ease;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav ul li {
+            margin: 0 20px;
+            position: relative;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            background-color: #00b4d8;
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        nav ul li a:focus {
+            outline: none;
+            border: 2px solid #00b4d8;
+        }
+
+        nav ul li.active a {
+            background-color: #004e7c;
+        }
+
+        nav ul li.active a:hover {
+            background-color: #005f87;
+        }
+
+        .user-info {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .user-info:hover {
+            transform: scale(1.05);
+            color: #00b4d8;
+        }
+
+        main {
+            padding: 20px;
+            background-color: #fff;
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                transform: scale(0.9); /* Reduz a escala do menu em telas pequenas */
+            }
+
+            nav ul li {
+                margin: 10px 0;
+            }
+
+            nav {
+                padding: 0 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                {% if user.is_authenticated %}
+                    <li class="user-info">Olá, <strong> {{ user.username }} </strong></li>
+                    <li><a href="{% url 'new_car' %}">Cadastrar Viatura</a></li>
+                {% endif %}
+
+                {% if not user.is_authenticated %}
+                    <li><a href="{% url 'register' %}">Cadastre-se</a></li>
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                {% endif %}
+
+                <li><a href="{% url 'cars_list' %}">Viaturas</a></li>
+                <li><a href="{% url 'dashbord' %}">Relatórios</a></li>
+
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}" id="logout-link">Sair</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Leandro Lopes</p>
+    </footer>
+
+    <script>
+        // JavaScript para confirmar se o usuário deseja sair
+        document.getElementById('logout-link').addEventListener('click', function(event) {
+            // Impede o redirecionamento imediato
+            event.preventDefault();
+
+            // Confirmação de saída
+            const confirmation = confirm("Você realmente deseja sair?");
+            if (confirmation) {
+                // Se o usuário confirmar, redireciona para o link de logout
+                window.location.href = "{% url 'logout' %}";
+            }
+        });
+    </script>
+</body>
+</html>

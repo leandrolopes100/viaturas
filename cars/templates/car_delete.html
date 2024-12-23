@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .card {
+    background-color: #d7d5d5;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 30px auto;
+    width: 90%;
+    max-width: 600px;
+  }
+
+  .card-header {
+    background-color: #0096c7;
+    color: #fff;
+    padding: 15px;
+    border-radius: 8px 8px 0 0;
+    text-align: center;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .card-body {
+    padding: 20px;
+    font-size: 1rem;
+    color: #333;
+    text-align: center;
+  }
+
+  .card-body p {
+    margin-bottom: 50px;
+  }
+
+  .buttons-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+  }
+
+  .btn {
+    display: inline-block;
+    background-color: #0096c7;
+    color: #fff;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    width: 48%;
+  }
+
+  .btn:hover {
+    background-color: #108eb8;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+  }
+
+  .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+
+  .btn-danger {
+    background-color: #d9534f;
+    border: none;
+  }
+
+  .btn-danger:hover {
+    background-color: #c9302c;
+  }
+
+  .error-message {
+    color: #d9534f;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+
+  a {
+    text-decoration: none !important;
+  }
+
+  .loading-spinner {
+    display: none;
+    margin: 20px auto;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0096c7;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Responsividade */
+  @media (max-width: 600px) {
+    .buttons-container {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+</style>
+
+<div class="card">
+  <div class="card-header">
+    <h1 class="card-title">Excluir viatura</h1>
+  </div>
+  <div class="card-body">
+    <p>Tem certeza que deseja excluir a viatura <strong>{{ object.brand }} {{ object.model }}</strong> do {{ object.batalhao }}?</p>
+    <form method="post" id="deleteForm">
+      {% csrf_token %}
+      <div class="loading-spinner" id="loadingSpinner"></div>
+      <div class="buttons-container">
+        <button type="submit" class="btn btn-danger" id="deleteButton">Deletar Viatura</button>
+        <a href="{% url 'cars_list' %}" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById('deleteForm').addEventListener('submit', function (event) {
+    const deleteButton = document.getElementById('deleteButton');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    // Mostra o spinner de carregamento
+    loadingSpinner.style.display = 'block';
+    // Desativa o botão para evitar múltiplos envios
+    deleteButton.disabled = true;
+    // Altera o texto do botão
+    deleteButton.textContent = 'Excluindo...';
+  });
+</script>
+{% endblock %}

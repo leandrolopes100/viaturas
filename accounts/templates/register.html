@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <style>
+    /* Container para centralizar o formulário */
+    .form-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f7fc;
+      padding: 20px;
+    }
+
+    .form-box {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 450px;
+    }
+
+    /* Título do formulário */
+    .form-box h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    /* Estilo para os campos do formulário */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.3s ease-in-out;
+    }
+
+    .form-group input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    /* Estilo para mensagens de erro */
+    .form-group .error-message {
+      color: #dc3545;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    /* Estilo do botão de submit */
+    .submit-button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1rem;
+      color: #fff;
+      background-color: #28a745;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    .submit-button:hover {
+      background-color: #218838;
+    }
+
+    .submit-button:focus {
+      outline: none;
+    }
+
+    /* Ajuste para responsividade */
+    @media (max-width: 600px) {
+      .form-box {
+        padding: 20px;
+        width: 90%;
+      }
+    }
+
+  </style>
+
+  <div class="form-container">
+    <div class="form-box">
+      <h2>Cadastro de Usuário</h2>
+
+      <!-- Formulário de cadastro -->
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- Campo de usuário -->
+        <div class="form-group">
+          {{ user_form.username.errors }}
+          <label for="{{ user_form.username.id_for_label }}">Usuário:</label>
+          {{ user_form.username }}
+          {% if user_form.username.errors %}
+            <div class="error-message">
+              {{ user_form.username.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Campo de senha -->
+        <div class="form-group">
+          {{ user_form.password1.errors }}
+          <label for="{{ user_form.password1.id_for_label }}">Senha:</label>
+          {{ user_form.password1 }}
+          {% if user_form.password1.errors %}
+            <div class="error-message">
+              {{ user_form.password1.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Campo de confirmação de senha -->
+        <div class="form-group">
+          {{ user_form.password2.errors }}
+          <label for="{{ user_form.password2.id_for_label }}">Confirmação de senha:</label>
+          {{ user_form.password2 }}
+          {% if user_form.password2.errors %}
+            <div class="error-message">
+              {{ user_form.password2.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Botão de envio -->
+        <div class="form-group">
+          <input type="submit" value="Cadastrar" class="submit-button">
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
